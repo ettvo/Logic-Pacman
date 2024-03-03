@@ -125,7 +125,7 @@ def findModelUnderstandingCheck() -> Dict[Expr, bool]:
     a = Expr('A')
     "*** BEGIN YOUR CODE HERE ***"
     # print("a.__dict__ is:", a.__dict__) # might be helpful for getting ideas
-    result = findModel(a)
+    result = pycoSAT(to_cnf(a))
     output = result[a]
     a.op = 'a'
     return {a: output}
@@ -175,20 +175,6 @@ def plTrueInverse(assignments: Dict[Expr, bool], inverse_statement: Expr) -> boo
     """
     "*** BEGIN YOUR CODE HERE ***"
     status = pl_true(~inverse_statement, assignments)
-    # if status == None: 
-    #     # need to get keys assigned for values not in status
-    #     new_dict = assignments.copy()
-    #     model = findModel(~inverse_statement)
-    #     if (model == False):
-    #         return False
-    #     elif (type(model) == bool and model == True):
-    #         return True
-    #     else: # has to be a dict
-    #         for key in model.keys():
-    #             if key not in assignments:
-    #                 new_dict.put(key, model[key])
-    #         status = 
-    #     return False
     return True if status == True else False
 
 #______________________________________________________________________________
@@ -214,8 +200,15 @@ def atLeastOne(literals: List[Expr]) -> Expr:
     True
     """
     "*** BEGIN YOUR CODE HERE ***"
-    util.raiseNotDefined()
-    "*** END YOUR CODE HERE ***"
+    curr_expr = None
+    for expr in literals:
+        if (curr_expr == None):
+            curr_expr = expr
+        else:
+            curr_expr = disjoin(curr_expr, expr)
+    return curr_expr
+
+    
 
 
 def atMostOne(literals: List[Expr]) -> Expr:
