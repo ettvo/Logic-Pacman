@@ -174,8 +174,22 @@ def plTrueInverse(assignments: Dict[Expr, bool], inverse_statement: Expr) -> boo
     pl_true may be useful here; see logic.py for its description.
     """
     "*** BEGIN YOUR CODE HERE ***"
-    util.raiseNotDefined()
-    "*** END YOUR CODE HERE ***"
+    status = pl_true(~inverse_statement, assignments)
+    # if status == None: 
+    #     # need to get keys assigned for values not in status
+    #     new_dict = assignments.copy()
+    #     model = findModel(~inverse_statement)
+    #     if (model == False):
+    #         return False
+    #     elif (type(model) == bool and model == True):
+    #         return True
+    #     else: # has to be a dict
+    #         for key in model.keys():
+    #             if key not in assignments:
+    #                 new_dict.put(key, model[key])
+    #         status = 
+    #     return False
+    return True if status == True else False
 
 #______________________________________________________________________________
 # QUESTION 2
