@@ -375,6 +375,48 @@ def findModelUnderstandingCheck() -> Dict[Expr, bool]:
 #     printResult(True, 6)
 #     return True
 
+# def entails(premise: Expr, conclusion: Expr) -> bool:
+#     def printResult(status, placement):
+#         x = 1
+#         # print((premise >> conclusion) , " with input: ", input, "and proceed: ", proceed, " and entails: ", status, "; hit ", placement)
+#     result = findModel(premise >> conclusion)
+#     input = findModel(premise)
+#     proceed = findModel(conclusion)
+#     if (type(input) == dict):
+#         exprList = input.keys()
+#         for symbol in exprList:
+#             # curr = findModel(conjoin(premise, symbol) >> conjoin(conclusion, symbol))
+#             # if (findModel(premise >> conclusion) == False):
+#             #     return False
+#             curr = findModel(conjoin(premise, symbol))
+#             proceed = findModel(conjoin(conclusion, symbol))
+#             # result = findModel(conjoin(premise, symbol) >> conjoin(conclusion, symbol))
+#             if result == False:
+#                 return False
+#             # print(curr)
+#             if (type(curr) == dict):
+#                 status = pl_true(premise >> conclusion, curr)
+#             if curr != False and proceed == False:
+#                 return False
+#             curr = findModel(conjoin(premise, ~symbol))
+#             proceed = findModel(conjoin(conclusion, ~symbol))
+#             result = findModel(conjoin(premise, ~symbol) >> conjoin(conclusion, ~symbol))
+#             if result == False:
+#                 return False
+#             # print(curr)
+#             if curr != False and proceed == False:
+#                 return False
+#         return True
+#     elif (type(input) == bool):
+#         # print("input bool: ", input)
+#         if (input == True and result == False):
+#             return False
+#         # if (input == False):
+#         #     return False
+#         return True
+#     print("fail!")
+#     return None
+
 def entails(premise: Expr, conclusion: Expr) -> bool:
     def printResult(status, placement):
         x = 1
@@ -382,50 +424,50 @@ def entails(premise: Expr, conclusion: Expr) -> bool:
     result = findModel(premise >> conclusion)
     input = findModel(premise)
     proceed = findModel(conclusion)
-    # if (result == False):
-    #     # printResult(False, 0)
-    #     return False
-    # elif (input == False):
-    #     # printResult(False, 1)
-    #     return False
-    # elif (proceed == False):
-    #     # printResult(False, 2)
-    #     return False
-    # if (proceed == True):
-    #     printResult(True, 3.5)
-    #     return True
-
-    # if (type(input) == dict):
-    #     exprList = input.keys()
-    #     for symbol in exprList:
-    #         # curr = findModel(conjoin(premise, symbol) >> conjoin(conclusion, symbol))
-    #         curr = findModel(conjoin(premise >> conclusion, symbol))
-    #         # print(curr)
-    #         if curr == False:
-    #             return False
-    #         curr = findModel(conjoin(premise >> conclusion, ~symbol))
-    #         # print(curr)
-    #         if curr == False:
-    #             return False
-    #     return True
     if (type(input) == dict):
         exprList = input.keys()
         for symbol in exprList:
             # curr = findModel(conjoin(premise, symbol) >> conjoin(conclusion, symbol))
+            # if (findModel(premise >> conclusion) == False):
+            #     return False
             curr = findModel(conjoin(premise, symbol))
             proceed = findModel(conjoin(conclusion, symbol))
+            if (type(curr) == bool):
+                if (curr == True):
+                    if (proceed == False):
+                        return False
+            elif (type(curr) == dict):
+                status = pl_true(conclusion, curr)
+                if status != True:
+                    return False
+                    # check of proceed is false
+            # result = findModel(conjoin(premise, symbol) >> conjoin(conclusion, symbol))
+            # if result == False:
+            #     return False
             # print(curr)
-            if curr != False and proceed == False:
-                return False
             curr = findModel(conjoin(premise, ~symbol))
             proceed = findModel(conjoin(conclusion, ~symbol))
-            # print(curr)
-            if curr != False and proceed == False:
+            # result = findModel(conjoin(premise, ~symbol) >> conjoin(conclusion, ~symbol))
+            if (type(curr) == bool):
+                if (curr == True):
+                    if (proceed == False):
+                        return False
+            elif (type(curr) == dict):
+                status = pl_true(conclusion, curr)
+                if status != True:
+                    return False
+            if result == False:
                 return False
         return True
     elif (type(input) == bool):
-        print("input bool: ", input)
-        return input
+        # print("input bool: ", input)
+        if (input == True and result == False):
+            return False
+        # if (input == False):
+        #     return False
+        return True
+    print("fail!")
+    return None
 
 
 def plTrueInverse(assignments: Dict[Expr, bool], inverse_statement: Expr) -> bool:
