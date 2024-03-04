@@ -225,7 +225,49 @@ def atMostOne(literals: List[Expr]) -> Expr:
     #         curr_expr = conjoin(curr_expr, nested)
     # print(curr_expr)
     # return curr_expr
-    return conjoin([conjoin(x[0], disjoin(x[0], ~x[1])) for x in itertools.combinations(literals, 2)])
+    # result = conjoin([disjoin(x[0], disjoin(x[0], ~x[1])) for x in itertools.combinations(literals, 2)])
+    
+    # disjoin([[conjoin(symbol] for symbol in literals])
+
+    # result = None
+    # counter = 0
+    # for symbol in literals:
+    #     if counter < len(literals) - 1:
+    #         current = literals[:counter] + literals[counter + 1:]
+    #     else:
+    #         current = literals[:counter]
+    #     next = conjoin(symbol, map(lambda x: ~x, current))
+    #     if result == None:
+    #         result = next
+    #     else:
+    #         result = disjoin(result, next)
+
+    # result = disjoin([conjoin(x[0], ~x[1]) for x in itertools.combinations(literals, 2)])
+    
+    # subsequences = itertools.combinations(literals, 2)
+    # result = None
+    # for expr in subsequences:
+    #     # print(expr)
+    #     if (result == None):
+    #         result = disjoin(~expr[0] & ~expr[1])
+    #     else:
+    #         nested = disjoin(~expr[0] & ~expr[1])
+    #         result = conjoin(result, nested)
+    
+    
+    # print(result)
+
+    # noneTrue = None
+    # for x in literals:
+    #     if (noneTrue == None):
+    #         noneTrue = ~x
+    #     else:
+    #         noneTrue = conjoin(noneTrue, ~x)
+    
+    # result = disjoin(result, noneTrue)
+    # print(result)
+    return conjoin([disjoin(~x[0], ~x[1]) for x in itertools.combinations(literals, 2)])
+    # return result
 
 
 
