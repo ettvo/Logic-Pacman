@@ -194,21 +194,6 @@ def atLeastOne(literals: List[Expr]) -> Expr:
     True
     """
     "*** BEGIN YOUR CODE HERE ***"
-    # curr_expr = None
-    # for expr in literals:
-    #     if (curr_expr == None):
-    #         # curr_expr = disjoin(expr, ~expr)
-    #         print(logic.Expr.counter)
-    #         curr_expr = expr
-    #     else:
-    #         # nested = disjoin(expr, ~expr)
-    #         # curr_expr = conjoin(curr_expr, nested)
-    #         print(logic.Expr.counter)
-    #         # curr_expr = disjoin(curr_expr, expr)
-    #         curr_expr = curr_expr | expr
-    # print(logic.Expr.counter)
-    # print(curr_expr)
-    # return curr_expr
     return disjoin(literals)
 
     
@@ -222,24 +207,25 @@ def atMostOne(literals: List[Expr]) -> Expr:
     itertools.combinations may be useful here.
     """
     "*** BEGIN YOUR CODE HERE ***"
-    util.raiseNotDefined()
-    curr_expr = None
-    subsequences = itertools.combinations(literals, 2)
-    # stack = literals.copy()
-    print([_ for _ in itertools.combinations(literals, 2)])
-    for expr in subsequences:
-        # print(expr)
-        if (curr_expr == None):
-            # curr_expr =  disjoin(conjoin(expr[0], ~expr[1]), conjoin(~expr[0] & expr[1]))
-            # curr_expr = conjoin(expr[0], expr[1])
-            curr_expr = expr[0] & ~expr[1]
-        else:
-            # nested = conjoin(expr[0], ~expr[1])
-            nested = (expr[0] & ~expr[1])
-            # nested =  disjoin(conjoin(expr[0], ~expr[1]), conjoin(~expr[0] & expr[1]))
-            curr_expr = conjoin(curr_expr, nested)
-    print(curr_expr)
-    return curr_expr
+    #  util.raiseNotDefined()
+    # curr_expr = None
+    # subsequences = itertools.combinations(literals, 2)
+    # # stack = literals.copy()
+    # print([_ for _ in itertools.combinations(literals, 2)])
+    # for expr in subsequences:
+    #     # print(expr)
+    #     if (curr_expr == None):
+    #         # curr_expr =  disjoin(conjoin(expr[0], ~expr[1]), conjoin(~expr[0] & expr[1]))
+    #         # curr_expr = conjoin(expr[0], expr[1])
+    #         curr_expr = expr[0] & ~expr[1]
+    #     else:
+    #         # nested = conjoin(expr[0], ~expr[1])
+    #         nested = (expr[0] & ~expr[1])
+    #         # nested =  disjoin(conjoin(expr[0], ~expr[1]), conjoin(~expr[0] & expr[1]))
+    #         curr_expr = conjoin(curr_expr, nested)
+    # print(curr_expr)
+    # return curr_expr
+    return conjoin([conjoin(x[0], disjoin(x[0], ~x[1])) for x in itertools.combinations(literals, 2)])
 
 
 
