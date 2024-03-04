@@ -207,65 +207,6 @@ def atMostOne(literals: List[Expr]) -> Expr:
     itertools.combinations may be useful here.
     """
     "*** BEGIN YOUR CODE HERE ***"
-    #  util.raiseNotDefined()
-    # curr_expr = None
-    # subsequences = itertools.combinations(literals, 2)
-    # # stack = literals.copy()
-    # print([_ for _ in itertools.combinations(literals, 2)])
-    # for expr in subsequences:
-    #     # print(expr)
-    #     if (curr_expr == None):
-    #         # curr_expr =  disjoin(conjoin(expr[0], ~expr[1]), conjoin(~expr[0] & expr[1]))
-    #         # curr_expr = conjoin(expr[0], expr[1])
-    #         curr_expr = expr[0] & ~expr[1]
-    #     else:
-    #         # nested = conjoin(expr[0], ~expr[1])
-    #         nested = (expr[0] & ~expr[1])
-    #         # nested =  disjoin(conjoin(expr[0], ~expr[1]), conjoin(~expr[0] & expr[1]))
-    #         curr_expr = conjoin(curr_expr, nested)
-    # print(curr_expr)
-    # return curr_expr
-    # result = conjoin([disjoin(x[0], disjoin(x[0], ~x[1])) for x in itertools.combinations(literals, 2)])
-    
-    # disjoin([[conjoin(symbol] for symbol in literals])
-
-    # result = None
-    # counter = 0
-    # for symbol in literals:
-    #     if counter < len(literals) - 1:
-    #         current = literals[:counter] + literals[counter + 1:]
-    #     else:
-    #         current = literals[:counter]
-    #     next = conjoin(symbol, map(lambda x: ~x, current))
-    #     if result == None:
-    #         result = next
-    #     else:
-    #         result = disjoin(result, next)
-
-    # result = disjoin([conjoin(x[0], ~x[1]) for x in itertools.combinations(literals, 2)])
-    
-    # subsequences = itertools.combinations(literals, 2)
-    # result = None
-    # for expr in subsequences:
-    #     # print(expr)
-    #     if (result == None):
-    #         result = disjoin(~expr[0] & ~expr[1])
-    #     else:
-    #         nested = disjoin(~expr[0] & ~expr[1])
-    #         result = conjoin(result, nested)
-    
-    
-    # print(result)
-
-    # noneTrue = None
-    # for x in literals:
-    #     if (noneTrue == None):
-    #         noneTrue = ~x
-    #     else:
-    #         noneTrue = conjoin(noneTrue, ~x)
-    
-    # result = disjoin(result, noneTrue)
-    # print(result)
     return conjoin([disjoin(~x[0], ~x[1]) for x in itertools.combinations(literals, 2)])
     # return result
 
@@ -278,8 +219,7 @@ def exactlyOne(literals: List[Expr]) -> Expr:
     the expressions in the list is true.
     """
     "*** BEGIN YOUR CODE HERE ***"
-    util.raiseNotDefined()
-    "*** END YOUR CODE HERE ***"
+    return conjoin(atMostOne(literals), atLeastOne(literals))
 
 #______________________________________________________________________________
 # QUESTION 3
