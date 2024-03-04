@@ -234,8 +234,10 @@ def pacmanSuccessorAxiomSingle(x: int, y: int, time: int, walls_grid: List[List[
     """
     now, last = time, time - 1
     # added
-    if time == 0:
-        last = time
+    if time < 0:
+        last = time = 0
+    elif time == 0:
+        last = 0
 
     possible_causes: List[Expr] = [] # enumerate all possible causes for P[x,y]_t
     # the if statements give a small performance boost and are required for q4 and q5 correctness
@@ -255,16 +257,6 @@ def pacmanSuccessorAxiomSingle(x: int, y: int, time: int, walls_grid: List[List[
         return None
     
     "*** BEGIN YOUR CODE HERE ***"
-    # return conjoin(PropSymbolExpr(pacman_str, x, y, time=now) % disjoin(possible_causes))
-    # return conjoin([~PropSymbolExpr(pacman_str, x, y, time=last) , ~PropSymbolExpr(wall_str, x, y), disjoin(possible_causes)])
-    # return conjoin(PropSymbolExpr(pacman_str, x, y, time=now) % disjoin(possible_causes))
-    # return PropSymbolExpr(pacman_str, x, y, time=now) % disjoin(possible_causes)
-    
-    # moved_causes_sent: Expr = conjoin([~PropSymbolExpr(pacman_str, x, y, time=last) , ~PropSymbolExpr(wall_str, x, y), disjoin(possible_causes)])
-    # result = conjoin(PropSymbolExpr(pacman_str, x, y, time=now) % disjoin([moved_causes_sent]))
-    # print("hit!")
-    # return result
-    
     return PropSymbolExpr(pacman_str, x, y, time=now) % disjoin(possible_causes)
 
 def SLAMSuccessorAxiomSingle(x: int, y: int, time: int, walls_grid: List[List[bool]]) -> Expr:
@@ -337,31 +329,41 @@ def pacphysicsAxioms(t: int, all_coords: List[Tuple], non_outer_wall_coords: Lis
     time = t
     wallConditions = []
     for wall in all_coords: 
-        wallConditions.append(PropSymbolExpr(wall_str, wall[0], wall[1]) >> ~PropSymbolExpr(pacman_str, wall[0], wall[1], time=time))
+        if time >= 0:
+            wallConditions.append(PropSymbolExpr(wall_str, wall[0], wall[1]) >> ~PropSymbolExpr(pacman_str, wall[0], wall[1], time=time))
     pacphysics_sentences.append(conjoin(wallConditions))
+    # clear
 
     positionStatements = []
-    for pos in non_outer_wall_coords:
-        positionStatements.append(PropSymbolExpr(pacman_str, pos[0], pos[1], time=time))
+    if time >= 0:
+        for pos in non_outer_wall_coords:
+            positionStatements.append(PropSymbolExpr(pacman_str, pos[0], pos[1], time=time))
     pacphysics_sentences.append(exactlyOne(positionStatements))
-    
-    movementStatements = [PropSymbolExpr('North', time=time), \
-                            PropSymbolExpr('South', time=time), \
-                            PropSymbolExpr('East', time=time), \
-                            PropSymbolExpr('West', time=time), \
-                            ] 
-    pacphysics_sentences.append(exactlyOne(movementStatements))
+    # clear
 
-    if (sensorModel != None):
+    if time >= 0:
+        movementStatements = [PropSymbolExpr('North', time=time), \
+                                PropSymbolExpr('South', time=time), \
+                                PropSymbolExpr('East', time=time), \
+                                PropSymbolExpr('West', time=time), \
+                                ] 
+        pacphysics_sentences.append(exactlyOne(movementStatements))
+    # clear
+
+    if (sensorModel != None and time >= 0):
         sensors = sensorAxioms(time, non_outer_wall_coords)
+        # sensors = sensorAxioms(time, all_coords)
         pacphysics_sentences.append(sensors)
-        
+        # print("sensor model: ", sensors)
+        # issue here, does not say BLOCKED and stuff
+
     if (successorAxioms != None and time >= 1):
         transitions = successorAxioms(time, walls_grid, non_outer_wall_coords)
         pacphysics_sentences.append(transitions)
+        # print("transitions: ", transitions)
 
     result = conjoin(pacphysics_sentences)
-
+    # print(result)
     return result
 
 
@@ -406,6 +408,7 @@ def checkLocationSatisfiability(x1_y1: Tuple[int, int], x0_y0: Tuple[int, int], 
     sentence = conjoin(KB)
     model1 = findModel(sentence)
     model2 = findModel(~sentence)
+    print("hit!")
     return (model1, model2)
 
 #______________________________________________________________________________
