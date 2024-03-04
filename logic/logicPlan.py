@@ -95,19 +95,6 @@ def sentence3() -> Expr:
     """
     "*** BEGIN YOUR CODE HERE ***"
     # PacmanAlive_0 = PropSymbolExpr(str, a1, a2, a3, a4, time=a5)
-    # A = Expr('A')
-    # B = Expr('B')
-    # C = Expr('C')
-    # D = Expr('D')
-    # PacmanAlive_0 = PropSymbolExpr("Hello", time=0)
-    PacmanAlive_0 = Expr('PacmanAlive_0')
-    PacmanAlive_1 = Expr('PacmanAlive_1')
-    PacmanBorn_0 = Expr('PacmanBorn_0')
-    PacmanKilled_0 = Expr('PacmanKilled_0')
-    # return PropSymbolExpr("Yes", 1, 2, 3, 4, time=0)
-
-
-
     PacmanAlive_0 = PropSymbolExpr('PacmanAlive', time=0)
     PacmanAlive_1 = PropSymbolExpr('PacmanAlive', time=1)
     PacmanBorn_0 = PropSymbolExpr('PacmanBorn', time=0)
@@ -207,21 +194,22 @@ def atLeastOne(literals: List[Expr]) -> Expr:
     True
     """
     "*** BEGIN YOUR CODE HERE ***"
-    curr_expr = None
-    for expr in literals:
-        if (curr_expr == None):
-            # curr_expr = disjoin(expr, ~expr)
-            print(logic.Expr.counter)
-            curr_expr = expr
-        else:
-            # nested = disjoin(expr, ~expr)
-            # curr_expr = conjoin(curr_expr, nested)
-            print(logic.Expr.counter)
-            # curr_expr = disjoin(curr_expr, expr)
-            curr_expr = curr_expr | expr
-    print(logic.Expr.counter)
-    print(curr_expr)
-    return curr_expr
+    # curr_expr = None
+    # for expr in literals:
+    #     if (curr_expr == None):
+    #         # curr_expr = disjoin(expr, ~expr)
+    #         print(logic.Expr.counter)
+    #         curr_expr = expr
+    #     else:
+    #         # nested = disjoin(expr, ~expr)
+    #         # curr_expr = conjoin(curr_expr, nested)
+    #         print(logic.Expr.counter)
+    #         # curr_expr = disjoin(curr_expr, expr)
+    #         curr_expr = curr_expr | expr
+    # print(logic.Expr.counter)
+    # print(curr_expr)
+    # return curr_expr
+    return disjoin(literals)
 
     
 
