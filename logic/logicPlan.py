@@ -332,29 +332,9 @@ def pacphysicsAxioms(t: int, all_coords: List[Tuple], non_outer_wall_coords: Lis
 
     "*** BEGIN YOUR CODE HERE ***"
     time = t
-    # all_coords: List[Tuple], (x,y)
-    # non_outer_wall_coords: List[Tuple], (x,y)
-    # walls_grid: List[List] = None, ; passed to successorAxioms
-    # sensorModel: Callable = None, ; returns Expr describing observation rules
-    # successorAxioms: Callable = None ; (time, walls_grid, non_outer_wall_coords), returns Expr with transition rules
-    
-    # adds condition that if a wall is at (X, Y), then Pacman is not there --> simplify by removing the first clause since already weeded out by other structures
-    # wallConditions = []
-    # for wall in all_coords:
-    #     print(wall)
-    #     if (wall not in non_outer_wall_coords and time >= 0):
-    #         # wallCondition = conjoin(PropSymbolExpr(wall_str, wall[0], wall[1], time=time), ~PropSymbolExpr(pacman_str, wall[0], wall[1], time=time))
-    #         wallConditions.append(conjoin(PropSymbolExpr(wall_str, wall[0], wall[1]), ~PropSymbolExpr(pacman_str, wall[0], wall[1], time=time)))
-    # pacphysics_sentences.append(conjoin(wallConditions))
-
     wallConditions = []
-    for wall in all_coords:
-        # print(wall)
-        # if (wall not in non_outer_wall_coords and time >= 0):
-        #     
+    for wall in all_coords: 
         wallConditions.append(PropSymbolExpr(wall_str, wall[0], wall[1]) >> ~PropSymbolExpr(pacman_str, wall[0], wall[1], time=time))
-            # wallConditions.append(~PropSymbolExpr(pacman_str, wall[0], wall[1], time=time))
-    # pacphysics_sentences.extend(wallConditions)
     pacphysics_sentences.append(conjoin(wallConditions))
 
     positionStatements = []
@@ -364,7 +344,6 @@ def pacphysicsAxioms(t: int, all_coords: List[Tuple], non_outer_wall_coords: Lis
     pacphysics_sentences.append(exactlyOne(positionStatements))
     
     if time >= 0:
-        # movementStatements = [PropSymbolExpr(d, time=time) for d in PropSymbolExpr.DIRECTIONS]
         movementStatements = [PropSymbolExpr('North', time=time), \
                               PropSymbolExpr('South', time=time), \
                               PropSymbolExpr('East', time=time), \
@@ -414,9 +393,20 @@ def checkLocationSatisfiability(x1_y1: Tuple[int, int], x0_y0: Tuple[int, int], 
     KB.append(conjoin(map_sent))
 
     "*** BEGIN YOUR CODE HERE ***"
-    util.raiseNotDefined()
-    
+    # x1_y1: Tuple[int, int], x0_y0: Tuple[int, int], action0, action1, problem
+    KB.append(pacphysicsAxioms(0, all_coords=all_coords, non_outer_wall_coords=non_outer_wall_coords, walls_grid=walls_grid, sensorModel=None, successorAxioms=allLegalSuccessorAxioms))
+    KB.append(pacphysicsAxioms(1, all_coords=all_coords, non_outer_wall_coords=non_outer_wall_coords, walls_grid=walls_grid, sensorModel=None, successorAxioms=allLegalSuccessorAxioms))
+    # KB.append((x0, y0))
+    # KB.append(action0)
+    # KB.append(action1)
+    KB.append(PropSymbolExpr(pacman_str, x0, y0, time=0))
+    KB.append(PropSymbolExpr(action0, time=0))
+    KB.append(PropSymbolExpr(action1, time=1))
 
+    sentence = conjoin(KB)
+    model1 = findModel(sentence)
+    model2 = findModel(~sentence)
+    return (model1, model2)
 
 #______________________________________________________________________________
 # QUESTION 4
