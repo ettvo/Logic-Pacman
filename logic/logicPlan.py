@@ -259,10 +259,13 @@ def pacmanSuccessorAxiomSingle(x: int, y: int, time: int, walls_grid: List[List[
     # return conjoin([~PropSymbolExpr(pacman_str, x, y, time=last) , ~PropSymbolExpr(wall_str, x, y), disjoin(possible_causes)])
     # return conjoin(PropSymbolExpr(pacman_str, x, y, time=now) % disjoin(possible_causes))
     # return PropSymbolExpr(pacman_str, x, y, time=now) % disjoin(possible_causes)
-    print("asadsd")
-    moved_causes_sent: Expr = conjoin([~PropSymbolExpr(pacman_str, x, y, time=last) , ~PropSymbolExpr(wall_str, x, y), disjoin(possible_causes)])
-    return conjoin(PropSymbolExpr(pacman_str, x, y, time=now) % disjoin([moved_causes_sent]))
-    # return PropSymbolExpr(pacman_str, x, y, time=now) % disjoin(possible_causes)
+    
+    # moved_causes_sent: Expr = conjoin([~PropSymbolExpr(pacman_str, x, y, time=last) , ~PropSymbolExpr(wall_str, x, y), disjoin(possible_causes)])
+    # result = conjoin(PropSymbolExpr(pacman_str, x, y, time=now) % disjoin([moved_causes_sent]))
+    # print("hit!")
+    # return result
+    
+    return PropSymbolExpr(pacman_str, x, y, time=now) % disjoin(possible_causes)
 
 def SLAMSuccessorAxiomSingle(x: int, y: int, time: int, walls_grid: List[List[bool]]) -> Expr:
     """
@@ -339,20 +342,17 @@ def pacphysicsAxioms(t: int, all_coords: List[Tuple], non_outer_wall_coords: Lis
 
     positionStatements = []
     for pos in non_outer_wall_coords:
-        if (time >= 0):
-            positionStatements.append(PropSymbolExpr(pacman_str, pos[0], pos[1], time=time))
+        positionStatements.append(PropSymbolExpr(pacman_str, pos[0], pos[1], time=time))
     pacphysics_sentences.append(exactlyOne(positionStatements))
     
-    if time >= 0:
-        movementStatements = [PropSymbolExpr('North', time=time), \
-                              PropSymbolExpr('South', time=time), \
-                              PropSymbolExpr('East', time=time), \
-                              PropSymbolExpr('West', time=time), \
-                             ] 
+    movementStatements = [PropSymbolExpr('North', time=time), \
+                            PropSymbolExpr('South', time=time), \
+                            PropSymbolExpr('East', time=time), \
+                            PropSymbolExpr('West', time=time), \
+                            ] 
+    pacphysics_sentences.append(exactlyOne(movementStatements))
 
-        pacphysics_sentences.append(exactlyOne(movementStatements))
-
-    if (sensorModel != None and time >= 0):
+    if (sensorModel != None):
         sensors = sensorAxioms(time, non_outer_wall_coords)
         pacphysics_sentences.append(sensors)
         
