@@ -105,6 +105,13 @@ def sentence3() -> Expr:
     PacmanBorn_0 = Expr('PacmanBorn_0')
     PacmanKilled_0 = Expr('PacmanKilled_0')
     # return PropSymbolExpr("Yes", 1, 2, 3, 4, time=0)
+
+
+
+    PacmanAlive_0 = PropSymbolExpr('PacmanAlive', time=0)
+    PacmanAlive_1 = PropSymbolExpr('PacmanAlive', time=1)
+    PacmanBorn_0 = PropSymbolExpr('PacmanBorn', time=0)
+    PacmanKilled_0 = PropSymbolExpr('PacmanKilled', time=0)
     Expr1 = PacmanAlive_1 % ((PacmanAlive_0 & ~PacmanKilled_0) | (~PacmanAlive_0 & PacmanBorn_0))
     Expr2 = ~(PacmanAlive_0 & PacmanBorn_0)
     Expr3 = PacmanBorn_0
@@ -203,9 +210,17 @@ def atLeastOne(literals: List[Expr]) -> Expr:
     curr_expr = None
     for expr in literals:
         if (curr_expr == None):
+            # curr_expr = disjoin(expr, ~expr)
+            print(logic.Expr.counter)
             curr_expr = expr
         else:
-            curr_expr = disjoin(curr_expr, expr)
+            # nested = disjoin(expr, ~expr)
+            # curr_expr = conjoin(curr_expr, nested)
+            print(logic.Expr.counter)
+            # curr_expr = disjoin(curr_expr, expr)
+            curr_expr = curr_expr | expr
+    print(logic.Expr.counter)
+    print(curr_expr)
     return curr_expr
 
     
@@ -220,7 +235,24 @@ def atMostOne(literals: List[Expr]) -> Expr:
     """
     "*** BEGIN YOUR CODE HERE ***"
     util.raiseNotDefined()
-    "*** END YOUR CODE HERE ***"
+    curr_expr = None
+    subsequences = itertools.combinations(literals, 2)
+    # stack = literals.copy()
+    print([_ for _ in itertools.combinations(literals, 2)])
+    for expr in subsequences:
+        # print(expr)
+        if (curr_expr == None):
+            # curr_expr =  disjoin(conjoin(expr[0], ~expr[1]), conjoin(~expr[0] & expr[1]))
+            # curr_expr = conjoin(expr[0], expr[1])
+            curr_expr = expr[0] & ~expr[1]
+        else:
+            # nested = conjoin(expr[0], ~expr[1])
+            nested = (expr[0] & ~expr[1])
+            # nested =  disjoin(conjoin(expr[0], ~expr[1]), conjoin(~expr[0] & expr[1]))
+            curr_expr = conjoin(curr_expr, nested)
+    print(curr_expr)
+    return curr_expr
+
 
 
 def exactlyOne(literals: List[Expr]) -> Expr:
