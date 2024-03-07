@@ -126,6 +126,49 @@ def findModelUnderstandingCheck() -> Dict[Expr, bool]:
     
 
 def entails(premise: Expr, conclusion: Expr) -> bool:
+    premise_symbols = logic.prop_symbols(premise)
+    for symbol in premise_symbols:
+        curr = findModel(premise & symbol)
+        if curr != False:
+            status = pl_true(conclusion, curr)
+            if (status == False):
+                return False
+        curr = findModel(premise & ~symbol)
+        if curr != False:
+            status = pl_true(conclusion, curr)
+            if (status == False):
+                return False
+    return True
+
+
+def entails0(premise: Expr, conclusion: Expr) -> bool:
+    premise_symbols = logic.prop_symbols(premise)
+    input = findModel(premise)
+    proceed = findModel(conclusion)
+    # if (input == False & proceed == True):
+    #     return False
+    # elif (input == True & )
+    if (input == True and proceed == False):
+        return False
+    elif (type(input) == dict):
+        print(input)
+        status = pl_true(conclusion, input)
+        print("status: ", status)
+        if (status != True):
+            print("hit1")
+            return False
+        print("hit2!")
+        return True
+        # if (status == False):
+        #     return False
+        # elif (status == None):
+        #     curr = findModel(premise >> conclusion)
+        #     if (pl_true(conclusion, ))
+    else:
+        print("wtf")
+    return False
+
+def entails2(premise: Expr, conclusion: Expr) -> bool:
     result = findModel(premise >> conclusion)
     input = findModel(premise)
     proceed = findModel(conclusion)
@@ -353,12 +396,15 @@ def pacphysicsAxioms(t: int, all_coords: List[Tuple], non_outer_wall_coords: Lis
     if (sensorModel != None and time >= 0):
         sensors = sensorAxioms(time, non_outer_wall_coords)
         # sensors = sensorAxioms(time, all_coords)
+        # pacphysics_sentences.append(Expr('AAAAAAAAAA'))
         pacphysics_sentences.append(sensors)
+        # pacphysics_sentences.append(Expr('AAAAAAAAAA'))
         # print("sensor model: ", sensors)
         # issue here, does not say BLOCKED and stuff
 
     if (successorAxioms != None and time >= 1):
         transitions = successorAxioms(time, walls_grid, non_outer_wall_coords)
+        # pacphysics_sentences.append(Expr('BBBBBBBBBB'))
         pacphysics_sentences.append(transitions)
         # print("transitions: ", transitions)
 
@@ -402,6 +448,7 @@ def checkLocationSatisfiability(x1_y1: Tuple[int, int], x0_y0: Tuple[int, int], 
     # KB.append(action0)
     # KB.append(action1)
     KB.append(PropSymbolExpr(pacman_str, x0, y0, time=0))
+    KB.append(PropSymbolExpr(pacman_str, x1, y1, time=1))
     KB.append(PropSymbolExpr(action0, time=0))
     KB.append(PropSymbolExpr(action1, time=1))
 
