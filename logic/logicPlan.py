@@ -461,7 +461,7 @@ def foodLogicPlan(problem) -> List:
     "*** BEGIN YOUR CODE HERE ***"
     KB.append(PropSymbolExpr(pacman_str, x0, y0, time=0))
     KB.append(conjoin([PropSymbolExpr(food_str, pos[0], pos[1], time=0) for pos in food]))
-    print("Start state: ", conjoin(KB), "\n")
+
     for t in range(50):
         print("time: ", t)
 
@@ -476,21 +476,17 @@ def foodLogicPlan(problem) -> List:
 
         possible_positions = exactlyOne(non_wall_coords_exprs)
         KB.append(possible_positions)
-        print("Possible locations for Pacman: ", possible_positions, "\n")
 
-        for pos in food: # looks fine tbh 
+        for pos in food: 
             pac_pos = PropSymbolExpr(pacman_str, pos[0], pos[1], time=t)
             food_curr = PropSymbolExpr(food_str, pos[0], pos[1], time=t)
             food_next = PropSymbolExpr(food_str, pos[0], pos[1], time=t+1) % conjoin(~pac_pos, food_curr)
             food_exprs.append(food_curr)
             successorAxioms.append(food_next)
-        # KB.append(conjoin(food_exprs))
+            
         KB.append(conjoin(successorAxioms))
-        print("Successor food states: ", successorAxioms, "\n")
 
         pac_goal = ~(disjoin(food_exprs)) # no food left
-        # pac_goal = conjoin(food_exprs)
-        print("pac_goal: ", pac_goal, "\n")
 
         movementStatements = [PropSymbolExpr(actions[0], time=t), \
                             PropSymbolExpr(actions[1], time=t), \
@@ -499,99 +495,16 @@ def foodLogicPlan(problem) -> List:
                             ] 
         possible_moves = exactlyOne(movementStatements)
         KB.append(possible_moves)
-        print("Possible moves: ", possible_moves, "\n")
 
-        # python3 autograder.py -q q5 -t ./test_cases/q5/foodLogicPlan1
         successor_states = conjoin(transitions)
         KB.append(successor_states)
-        print("Successor states: ", successor_states, "\n")
 
         curr_model = findModel(conjoin(conjoin(KB), pac_goal))
         if (curr_model != False):
             action_seq = extractActionSequence(model=curr_model, actions=actions)
-            print("model: ", curr_model, "\n")
-            print("action_seq: ", action_seq, "\n")
             return action_seq
 
     return []
-
-# def foodLogicPlan(problem) -> List:
-#     """
-#     Given an instance of a FoodPlanningProblem, return a list of actions that help Pacman
-#     eat all of the food.
-#     Available actions are ['North', 'East', 'South', 'West']
-#     Note that STOP is not an available action.
-#     Overview: add knowledge incrementally, and query for a model each timestep. Do NOT use pacphysicsAxioms.
-#     """
-#     walls = problem.walls
-#     width, height = problem.getWidth(), problem.getHeight()
-#     walls_list = walls.asList()
-#     (x0, y0), food = problem.start
-#     food = food.asList()
-
-#     # Get lists of possible locations (i.e. without walls) and possible actions
-#     all_coords = list(itertools.product(range(width + 2), range(height + 2)))
-
-#     non_wall_coords = [loc for loc in all_coords if loc not in walls_list]
-#     actions = [ 'North', 'South', 'East', 'West' ]
-
-#     KB = []
-
-#     "*** BEGIN YOUR CODE HERE ***"
-#     KB.append(PropSymbolExpr(pacman_str, x0, y0, time=0))
-#     KB.append(conjoin([PropSymbolExpr(food_str, pos[0], pos[1], time=0) for pos in non_wall_coords]))
-#     print("Start state: ", conjoin(KB), "\n")
-#     for t in range(50):
-#         print("time: ", t)
-
-#         non_wall_coords_exprs = []
-#         food_exprs = []
-#         successorAxioms = []
-#         transitions = []
-#         for pos in non_wall_coords:
-#             pac_pos = PropSymbolExpr(pacman_str, pos[0], pos[1], time=t)
-#             non_wall_coords_exprs.append(pac_pos)
-#             transitions.append(pacmanSuccessorAxiomSingle(x=pos[0], y=pos[1], time=t+1, walls_grid=walls))
-#             pac_pos = PropSymbolExpr(pacman_str, pos[0], pos[1], time=t)
-#             food_curr = PropSymbolExpr(food_str, pos[0], pos[1], time=t)
-#             food_next = PropSymbolExpr(food_str, pos[0], pos[1], time=t+1) % conjoin(pac_pos, food_curr)
-#             food_exprs.append(food_curr)
-#             successorAxioms.append(food_next)
-
-#         possible_positions = exactlyOne(non_wall_coords_exprs)
-#         KB.append(possible_positions)
-#         print("Possible locations for Pacman: ", possible_positions, "\n")
-
-#         KB.append(conjoin(successorAxioms))
-#         print("Successor food states: ", successorAxioms, "\n")
-
-#         pac_goal = ~(disjoin(food_exprs)) # no food left
-#         # pac_goal = conjoin(food_exprs)
-#         print("pac_goal: ", pac_goal, "\n")
-
-#         movementStatements = [PropSymbolExpr(actions[0], time=t), \
-#                             PropSymbolExpr(actions[1], time=t), \
-#                             PropSymbolExpr(actions[2], time=t), \
-#                             PropSymbolExpr(actions[3], time=t), \
-#                             ] 
-#         possible_moves = exactlyOne(movementStatements)
-#         KB.append(possible_moves)
-#         print("Possible moves: ", possible_moves, "\n")
-
-#         # python3 autograder.py -q q5 -t ./test_cases/q5/foodLogicPlan1
-#         successor_states = conjoin(transitions)
-#         KB.append(successor_states)
-#         print("Successor states: ", successor_states, "\n")
-
-#         curr_model = findModel(conjoin(conjoin(KB), pac_goal))
-#         if (curr_model != False):
-#             action_seq = extractActionSequence(model=curr_model, actions=actions)
-#             print("model: ", curr_model, "\n")
-#             print("action_seq: ", action_seq, "\n")
-#             return action_seq
-
-#     return []
-
 
 #______________________________________________________________________________
 # QUESTION 6
@@ -614,6 +527,7 @@ def localization(problem, agent) -> Generator:
     for t in range(agent.num_timesteps):
         "*** END YOUR CODE HERE ***"
         yield possible_locations
+    # python3 autograder.py -q q5 -t ./test_cases/q5/foodLogicPlan1
 
 #______________________________________________________________________________
 # QUESTION 7
