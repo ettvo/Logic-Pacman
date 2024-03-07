@@ -59,7 +59,6 @@ def sentence1() -> Expr:
     return conjoin(Expr1, Expr2, Expr3)
 
 
-
 def sentence2() -> Expr:
     """Returns a Expr instance that encodes that the following expressions are all true.
     
@@ -78,7 +77,6 @@ def sentence2() -> Expr:
     Expr3 = (~(B & ~C)) >> A
     Expr4 = ~D >> C
     return conjoin(Expr1, Expr2, Expr3, Expr4)
-
 
 
 def sentence3() -> Expr:
@@ -111,6 +109,7 @@ def findModel(sentence: Expr) -> Dict[Expr, bool]:
     """
     cnf_sentence = to_cnf(sentence)
     return pycoSAT(cnf_sentence)
+
 
 def findModelUnderstandingCheck() -> Dict[Expr, bool]:
     """Returns the result of findModel(Expr('a')) if lower cased expressions were allowed.
@@ -148,6 +147,7 @@ def plTrueInverse(assignments: Dict[Expr, bool], inverse_statement: Expr) -> boo
     "*** BEGIN YOUR CODE HERE ***"
     status = pl_true(~inverse_statement, assignments)
     return True if status == True else False
+
 
 #______________________________________________________________________________
 # QUESTION 2
@@ -187,7 +187,6 @@ def atMostOne(literals: List[Expr]) -> Expr:
     # return result
 
 
-
 def exactlyOne(literals: List[Expr]) -> Expr:
     """
     Given a list of Expr literals, return a single Expr instance in 
@@ -196,6 +195,7 @@ def exactlyOne(literals: List[Expr]) -> Expr:
     """
     "*** BEGIN YOUR CODE HERE ***"
     return conjoin(atMostOne(literals), atLeastOne(literals))
+
 
 #______________________________________________________________________________
 # QUESTION 3
@@ -234,6 +234,7 @@ def pacmanSuccessorAxiomSingle(x: int, y: int, time: int, walls_grid: List[List[
     
     "*** BEGIN YOUR CODE HERE ***"
     return PropSymbolExpr(pacman_str, x, y, time=now) % disjoin(possible_causes)
+
 
 def SLAMSuccessorAxiomSingle(x: int, y: int, time: int, walls_grid: List[List[bool]]) -> Expr:
     """
@@ -365,17 +366,9 @@ def checkLocationSatisfiability(x1_y1: Tuple[int, int], x0_y0: Tuple[int, int], 
     KB.append(conjoin(map_sent))
 
     "*** BEGIN YOUR CODE HERE ***"
-    # x1_y1: Tuple[int, int], x0_y0: Tuple[int, int], 
-    # action0, action1, problem
-
-    # pacphysicsAxioms(t: int, all_coords: List[Tuple], 
-    # non_outer_wall_coords: List[Tuple], walls_grid: List[List] = None, 
-    # sensorModel: Callable = None, 
-    # successorAxioms: Callable = None) -> Expr:
     KB.append(pacphysicsAxioms(0, all_coords=all_coords, non_outer_wall_coords=non_outer_wall_coords, walls_grid=walls_grid, sensorModel=None, successorAxioms=allLegalSuccessorAxioms))
     KB.append(pacphysicsAxioms(1, all_coords=all_coords, non_outer_wall_coords=non_outer_wall_coords, walls_grid=walls_grid, sensorModel=None, successorAxioms=allLegalSuccessorAxioms))
     KB.append(PropSymbolExpr(pacman_str, x0, y0, time=0))
-    # KB.append(PropSymbolExpr(pacman_str, x1, y1, time=1))
     KB.append(PropSymbolExpr(action0, time=0))
     KB.append(PropSymbolExpr(action1, time=1))
     
@@ -384,8 +377,8 @@ def checkLocationSatisfiability(x1_y1: Tuple[int, int], x0_y0: Tuple[int, int], 
     model2_expr = conjoin(~PropSymbolExpr(pacman_str, x1, y1, time=1), kb_conjoin)
     model1 = findModel(model1_expr)
     model2 = findModel(model2_expr)
-    print("hit!")
     return (model1, model2)
+
 
 #______________________________________________________________________________
 # QUESTION 4
@@ -411,8 +404,31 @@ def positionLogicPlan(problem) -> List:
     KB = []
 
     "*** BEGIN YOUR CODE HERE ***"
-    util.raiseNotDefined()
-    "*** END YOUR CODE HERE ***"
+    KB.append(PropSymbolExpr(pacman_str, x0, y0, time=0))
+    
+    for t in range(50):
+        print("time: ", t)
+        non_wall_coords_exprs = [PropSymbolExpr(pacman_str, pos[0], pos[1], time=t) for pos in non_wall_coords]
+        KB.append(exactlyOne(non_wall_coords_exprs))
+
+        pac_goal = PropSymbolExpr(pacman_str, xg, yg, time=t)
+        curr_model = findModel(conjoin(conjoin(KB), pac_goal))
+        if (curr_model != False):
+            action_seq = extractActionSequence(model=curr_model, actions=actions)
+            print(action_seq)
+            return action_seq
+        
+        movementStatements = [PropSymbolExpr(actions[0], time=t), \
+                            PropSymbolExpr(actions[1], time=t), \
+                            PropSymbolExpr(actions[2], time=t), \
+                            PropSymbolExpr(actions[3], time=t), \
+                            ] 
+        KB.append(exactlyOne(movementStatements))
+
+        transitions = [pacmanSuccessorAxiomSingle(x=pos[0], y=pos[1], time=t+1, walls_grid=walls_grid) for pos in non_wall_coords]
+        KB.extend(transitions)
+        
+    return []
 
 #______________________________________________________________________________
 # QUESTION 5
