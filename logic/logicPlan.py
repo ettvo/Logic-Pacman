@@ -129,6 +129,22 @@ def entails(premise: Expr, conclusion: Expr) -> bool:
     for symbol in premise_symbols:
         curr = findModel(premise & symbol)
         if curr != False:
+            status = pl_true(premise >> conclusion, curr)
+            if (status == False):
+                return False
+        curr = findModel(premise & ~symbol)
+        if curr != False:
+            status = pl_true(premise >> conclusion, curr)
+            if (status == False):
+                return False
+    return True
+
+
+def entailsOrig(premise: Expr, conclusion: Expr) -> bool:
+    premise_symbols = logic.prop_symbols(premise)
+    for symbol in premise_symbols:
+        curr = findModel(premise & symbol)
+        if curr != False:
             status = pl_true(conclusion, curr)
             if (status == False):
                 return False
@@ -522,12 +538,167 @@ def localization(problem, agent) -> Generator:
     KB = []
 
     "*** BEGIN YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    start = problem.getStartState()
+    # possible_pac_pos = []
+    KB.append(PropSymbolExpr(pacman_str, start[0], start[1], time=0))
+    # print(start)
+    for pos in all_coords:
+        if pos in walls_list:
+            if pos[0] == 3 and pos[1] == 1:
+                print("hit 3-1 wall")
+            KB.append(PropSymbolExpr(wall_str, pos[0], pos[1]))
+            # KB.append(~PropSymbolExpr(pacman_str, start[0], start[1], time=0))      
+        else:
+            if pos[0] == 3 and pos[1] == 1:
+                print("hit 3-1 no wall")
+            KB.append(~PropSymbolExpr(wall_str, pos[0], pos[1]))            
 
+    # need to use provided functions:
+    # - sensorAxioms
+    # - fourBitPerceptRules
+    possible_locations = []
     for t in range(agent.num_timesteps):
+        # Add pacphysics, action, and percept information to KB 
+        pacphysics_curr = pacphysicsAxioms(t, all_coords, non_outer_wall_coords, walls_grid, sensorModel=sensorAxioms, successorAxioms=allLegalSuccessorAxioms)
+        KB.append(pacphysics_curr)
+        action_t = PropSymbolExpr(agent.actions[t], time=t)
+        KB.append(action_t)
+        percept_rules = fourBitPerceptRules(t, agent.getPercepts())
+        KB.append(percept_rules)
+
+        print("action_t: ", action_t)
+        print("percept_rules: ", percept_rules)
+
+        # Find possible pacman locations with updated KB 
+        curr_locations = [] 
+        # if t == 0:
+        #     print(conjoin(KB))
+        for pos in non_outer_wall_coords:
+            conjoined_KB = conjoin(KB)
+            pac_pos = PropSymbolExpr(pacman_str, pos[0], pos[1], time=t)
+            pac_pos_entailed = entails(conjoined_KB, pac_pos)
+            pac_pos_not_entailed = entails(conjoined_KB, ~pac_pos)
+            
+            if pos[0] == 3 and pos[1] == 1:
+                print("pos (3,1) at time ", t)
+                print("pac_pos_entailed: ", pac_pos_entailed)
+                print("pac_pos_not_entailed: ", pac_pos_not_entailed)
+            
+            model = findModel(conjoin(conjoined_KB, pac_pos))
+            if model != False:
+                curr_locations.append(pos)
+            if pos[0] == 3 and pos[1] == 1:
+                    print("model: ", model)
+
+            if pac_pos_entailed and pac_pos_not_entailed:
+                # error! contradiction
+                print("impossible entails at time: ", t, " and pos: ", pos, "\n")
+            elif not pac_pos_entailed and pac_pos_not_entailed:
+                # Pacman provably not at pos
+                KB.append(~pac_pos)
+            elif pac_pos_entailed and not pac_pos_not_entailed:
+                KB.append(pac_pos)
+            
+            possible_locations.append(curr_locations)
+            print(curr_locations)
+                
+
+        agent.moveToNextState(action_t)
+
         "*** END YOUR CODE HERE ***"
-        yield possible_locations
-    # python3 autograder.py -q q5 -t ./test_cases/q5/foodLogicPlan1
+    yield possible_locations
+    # python3 autograder.py -q q6 -t ./test_cases/q6/localizationLogic1
+
+    # pacphysicsAxioms(t: int, all_coords: List[Tuple], non_outer_wall_coords: List[Tuple], walls_grid: List[List] = None, sensorModel: Callable = None, successorAxioms: Callable = None) -> Expr:
+    # fourBitPerceptRules(t: int, percepts: List) -> Expr:
+
+
+# def localization(problem, agent) -> Generator:
+#     '''
+#     problem: a LocalizationProblem instance
+#     agent: a LocalizationLogicAgent instance
+#     '''
+#     walls_grid = problem.walls
+#     walls_list = walls_grid.asList()
+#     all_coords = list(itertools.product(range(problem.getWidth()+2), range(problem.getHeight()+2)))
+#     non_outer_wall_coords = list(itertools.product(range(1, problem.getWidth()+1), range(1, problem.getHeight()+1)))
+
+#     KB = []
+
+#     "*** BEGIN YOUR CODE HERE ***"
+#     start = problem.getStartState()
+#     # possible_pac_pos = []
+#     KB.append(PropSymbolExpr(pacman_str, start[0], start[1], time=0))
+#     # print(start)
+#     for pos in all_coords:
+#         if pos in walls_list:
+#             if pos[0] == 3 and pos[1] == 1:
+#                 print("hit 3-1 wall")
+#             KB.append(PropSymbolExpr(wall_str, pos[0], pos[1]))
+#             # KB.append(~PropSymbolExpr(pacman_str, start[0], start[1], time=0))      
+#         else:
+#             if pos[0] == 3 and pos[1] == 1:
+#                 print("hit 3-1 no wall")
+#             KB.append(~PropSymbolExpr(wall_str, pos[0], pos[1]))            
+
+#     # need to use provided functions:
+#     # - sensorAxioms
+#     # - fourBitPerceptRules
+
+#     for t in range(agent.num_timesteps):
+#         # Add pacphysics, action, and percept information to KB 
+#         pacphysics_curr = pacphysicsAxioms(t, all_coords, non_outer_wall_coords, walls_grid, sensorModel=sensorAxioms, successorAxioms=allLegalSuccessorAxioms)
+#         KB.append(pacphysics_curr)
+#         action_t = PropSymbolExpr(agent.actions[t], time=t)
+#         KB.append(action_t)
+#         percept_rules = fourBitPerceptRules(t, agent.getPercepts())
+#         KB.append(percept_rules)
+
+#         print("pacphysics_curr: ", pacphysics_curr)
+#         print("action_t: ", action_t)
+#         print("percept_rules: ", percept_rules)
+
+#         # Find possible pacman locations with updated KB 
+#         possible_locations = [] 
+#         # if t == 0:
+#         #     print(conjoin(KB))
+#         for pos in non_outer_wall_coords:
+#             conjoined_KB = conjoin(KB)
+#             pac_pos = PropSymbolExpr(pacman_str, pos[0], pos[1], time=t)
+#             pac_pos_entailed = entails(conjoined_KB, pac_pos)
+#             pac_pos_not_entailed = entails(conjoined_KB, ~pac_pos)
+            
+#             if pos[0] == 3 and pos[1] == 1:
+#                 print("pos (3,1) at time ", t)
+#                 print("pac_pos_entailed: ", pac_pos_entailed)
+#                 print("pac_pos_not_entailed: ", pac_pos_not_entailed)
+            
+#             model = findModel(conjoin(conjoined_KB, pac_pos))
+#             if model != False:
+#                 possible_locations.append(pos)
+#             if pos[0] == 3 and pos[1] == 1:
+#                     print("model: ", model)
+
+#             if pac_pos_entailed and pac_pos_not_entailed:
+#                 # error! contradiction
+#                 print("impossible entails at time: ", t, " and pos: ", pos, "\n")
+#             elif not pac_pos_entailed and pac_pos_not_entailed:
+#                 # Pacman provably not at pos
+#                 KB.append(~pac_pos)
+#             elif pac_pos_entailed and not pac_pos_not_entailed:
+#                 KB.append(pac_pos)
+                
+                
+
+#         agent.moveToNextState(action_t)
+
+#         "*** END YOUR CODE HERE ***"
+#         yield possible_locations
+#     # python3 autograder.py -q q6 -t ./test_cases/q6/localizationLogic1
+
+#     # pacphysicsAxioms(t: int, all_coords: List[Tuple], non_outer_wall_coords: List[Tuple], walls_grid: List[List] = None, sensorModel: Callable = None, successorAxioms: Callable = None) -> Expr:
+#     # fourBitPerceptRules(t: int, percepts: List) -> Expr:
+
 
 #______________________________________________________________________________
 # QUESTION 7
@@ -710,6 +881,7 @@ def SLAMSuccessorAxioms(t: int, walls_grid: List[List], non_outer_wall_coords: L
         if xy_succ_axiom:
             all_xy_succ_axioms.append(xy_succ_axiom)
     return conjoin(all_xy_succ_axioms)
+
 
 #______________________________________________________________________________
 # Various useful functions, are not needed for completing the project but may be useful for debugging
