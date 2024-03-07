@@ -408,15 +408,12 @@ def positionLogicPlan(problem) -> List:
     
     for t in range(50):
         print("time: ", t)
-        non_wall_coords_exprs = [PropSymbolExpr(pacman_str, pos[0], pos[1], time=t) for pos in non_wall_coords]
+        non_wall_coords_exprs = []
+        transitions = []
+        for pos in non_wall_coords:
+            non_wall_coords_exprs.append(PropSymbolExpr(pacman_str, pos[0], pos[1], time=t))
+            transitions.append(pacmanSuccessorAxiomSingle(x=pos[0], y=pos[1], time=t+1, walls_grid=walls_grid))
         KB.append(exactlyOne(non_wall_coords_exprs))
-
-        pac_goal = PropSymbolExpr(pacman_str, xg, yg, time=t)
-        curr_model = findModel(conjoin(conjoin(KB), pac_goal))
-        if (curr_model != False):
-            action_seq = extractActionSequence(model=curr_model, actions=actions)
-            print(action_seq)
-            return action_seq
         
         movementStatements = [PropSymbolExpr(actions[0], time=t), \
                             PropSymbolExpr(actions[1], time=t), \
@@ -424,11 +421,18 @@ def positionLogicPlan(problem) -> List:
                             PropSymbolExpr(actions[3], time=t), \
                             ] 
         KB.append(exactlyOne(movementStatements))
-
-        transitions = [pacmanSuccessorAxiomSingle(x=pos[0], y=pos[1], time=t+1, walls_grid=walls_grid) for pos in non_wall_coords]
+        
+        pac_goal = PropSymbolExpr(pacman_str, xg, yg, time=t)
+        curr_model = findModel(conjoin(conjoin(KB), pac_goal))
+        if (curr_model != False):
+            action_seq = extractActionSequence(model=curr_model, actions=actions)
+            print(action_seq)
+            return action_seq
+        
         KB.extend(transitions)
         
     return []
+
 
 #______________________________________________________________________________
 # QUESTION 5
@@ -456,8 +460,43 @@ def foodLogicPlan(problem) -> List:
     KB = []
 
     "*** BEGIN YOUR CODE HERE ***"
-    util.raiseNotDefined()
-    "*** END YOUR CODE HERE ***"
+    KB.append(PropSymbolExpr(pacman_str, x0, y0, time=0))
+    
+    for t in range(50):
+        print("time: ", t)
+
+        non_wall_coords_exprs = []
+        food_exprs = []
+        successorAxioms = []
+        for pos in non_wall_coords:
+            pac_pos = PropSymbolExpr(pacman_str, pos[0], pos[1], time=t)
+            non_wall_coords_exprs.append(pac_pos)
+
+            food_curr = PropSymbolExpr(food_str, pos[0], pos[1], time=t)
+            food_exprs.append(food_curr)
+
+            food_next = PropSymbolExpr(food_str, pos[0], pos[1], time=t+1)
+            successorAxioms.append(food_next % conjoin(pac_pos, food_curr))
+        
+        KB.append(exactlyOne(non_wall_coords_exprs))
+        pac_goal = ~(disjoin(food_exprs)) # no food left
+        KB.append(conjoin(successorAxioms))
+
+
+        curr_model = findModel(conjoin(conjoin(KB), pac_goal))
+        if (curr_model != False):
+            action_seq = extractActionSequence(model=curr_model, actions=actions)
+            print(action_seq)
+            return action_seq
+        
+        movementStatements = [PropSymbolExpr(actions[0], time=t), \
+                            PropSymbolExpr(actions[1], time=t), \
+                            PropSymbolExpr(actions[2], time=t), \
+                            PropSymbolExpr(actions[3], time=t), \
+                            ] 
+        KB.append(exactlyOne(movementStatements))
+        
+    return []
 
 #______________________________________________________________________________
 # QUESTION 6
