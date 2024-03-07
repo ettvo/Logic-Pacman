@@ -174,8 +174,6 @@ def atLeastOne(literals: List[Expr]) -> Expr:
     "*** BEGIN YOUR CODE HERE ***"
     return disjoin(literals)
 
-    
-
 
 def atMostOne(literals: List[Expr]) -> Expr:
     """
@@ -302,46 +300,49 @@ def pacphysicsAxioms(t: int, all_coords: List[Tuple], non_outer_wall_coords: Lis
             locations on this time step. Consider edge cases. Don't call if None.
     """
     pacphysics_sentences = []
+    # >> = -->
+    # % = <==>
+    # ~ = NOT
+    # & = AND
+    # | = OR
 
     "*** BEGIN YOUR CODE HERE ***"
-    time = t
     wallConditions = []
-    for wall in all_coords: 
-        if time >= 0:
-            wallConditions.append(PropSymbolExpr(wall_str, wall[0], wall[1]) >> ~PropSymbolExpr(pacman_str, wall[0], wall[1], time=time))
-    pacphysics_sentences.append(conjoin(wallConditions))
-    # clear
+    if (t >= 0):
+        for wall in all_coords: 
+            wallConditions.append(PropSymbolExpr(wall_str, wall[0], wall[1]) >> ~PropSymbolExpr(pacman_str, wall[0], wall[1], time=t))
+        pacphysics_sentences.append(conjoin(wallConditions))
+        # clear
 
-    positionStatements = []
-    if time >= 0:
+        positionStatements = []
         for pos in non_outer_wall_coords:
-            positionStatements.append(PropSymbolExpr(pacman_str, pos[0], pos[1], time=time))
-    pacphysics_sentences.append(exactlyOne(positionStatements))
-    # clear
+            positionStatements.append(PropSymbolExpr(pacman_str, pos[0], pos[1], time=t))
+        pacphysics_sentences.append(exactlyOne(positionStatements))
+        # clear
 
-    if time >= 0:
-        movementStatements = [PropSymbolExpr('North', time=time), \
-                                PropSymbolExpr('South', time=time), \
-                                PropSymbolExpr('East', time=time), \
-                                PropSymbolExpr('West', time=time), \
-                                ] 
+        movementStatements = [PropSymbolExpr('North', time=t), \
+                            PropSymbolExpr('South', time=t), \
+                            PropSymbolExpr('East', time=t), \
+                            PropSymbolExpr('West', time=t), \
+                            ] 
         pacphysics_sentences.append(exactlyOne(movementStatements))
-    # clear
+        # clear
 
-    if (sensorModel != None and time >= 0):
-        sensors = sensorAxioms(time, non_outer_wall_coords)
-        # sensors = sensorAxioms(time, all_coords)
-        # pacphysics_sentences.append(Expr('AAAAAAAAAA'))
-        pacphysics_sentences.append(sensors)
-        # pacphysics_sentences.append(Expr('AAAAAAAAAA'))
-        # print("sensor model: ", sensors)
-        # issue here, does not say BLOCKED and stuff
+        if (sensorModel != None):
+            sensors = sensorModel(t, non_outer_wall_coords)
+            # pacphysics_sentences.append(Expr('AAAAAAAAAA'))
+            pacphysics_sentences.append(sensors)
+            # pacphysics_sentences.append(Expr('AAAAAAAAAA'))
+            # print("sensor model: ", sensors)
+            # issue here, does not say BLOCKED and stuff
 
-    if (successorAxioms != None and time >= 1):
-        transitions = successorAxioms(time, walls_grid, non_outer_wall_coords)
-        # pacphysics_sentences.append(Expr('BBBBBBBBBB'))
-        pacphysics_sentences.append(transitions)
-        # print("transitions: ", transitions)
+        if (successorAxioms != None and t >= 1):
+            transitions = successorAxioms(t, walls_grid, non_outer_wall_coords)
+            # transitions = allLegalSuccessorAxioms(t, walls_grid, non_outer_wall_coords)
+            
+            # pacphysics_sentences.append(Expr('BBBBBBBBBB'))
+            pacphysics_sentences.append(transitions)
+            # print("transitions: ", transitions)
 
     result = conjoin(pacphysics_sentences)
     # print(result)
