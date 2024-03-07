@@ -365,20 +365,25 @@ def checkLocationSatisfiability(x1_y1: Tuple[int, int], x0_y0: Tuple[int, int], 
     KB.append(conjoin(map_sent))
 
     "*** BEGIN YOUR CODE HERE ***"
-    # x1_y1: Tuple[int, int], x0_y0: Tuple[int, int], action0, action1, problem
+    # x1_y1: Tuple[int, int], x0_y0: Tuple[int, int], 
+    # action0, action1, problem
+
+    # pacphysicsAxioms(t: int, all_coords: List[Tuple], 
+    # non_outer_wall_coords: List[Tuple], walls_grid: List[List] = None, 
+    # sensorModel: Callable = None, 
+    # successorAxioms: Callable = None) -> Expr:
     KB.append(pacphysicsAxioms(0, all_coords=all_coords, non_outer_wall_coords=non_outer_wall_coords, walls_grid=walls_grid, sensorModel=None, successorAxioms=allLegalSuccessorAxioms))
     KB.append(pacphysicsAxioms(1, all_coords=all_coords, non_outer_wall_coords=non_outer_wall_coords, walls_grid=walls_grid, sensorModel=None, successorAxioms=allLegalSuccessorAxioms))
-    # KB.append((x0, y0))
-    # KB.append(action0)
-    # KB.append(action1)
     KB.append(PropSymbolExpr(pacman_str, x0, y0, time=0))
-    KB.append(PropSymbolExpr(pacman_str, x1, y1, time=1))
+    # KB.append(PropSymbolExpr(pacman_str, x1, y1, time=1))
     KB.append(PropSymbolExpr(action0, time=0))
     KB.append(PropSymbolExpr(action1, time=1))
-
-    sentence = conjoin(KB)
-    model1 = findModel(sentence)
-    model2 = findModel(~sentence)
+    
+    kb_conjoin = conjoin(KB)
+    model1_expr = conjoin(PropSymbolExpr(pacman_str, x1, y1, time=1), kb_conjoin)
+    model2_expr = conjoin(~PropSymbolExpr(pacman_str, x1, y1, time=1), kb_conjoin)
+    model1 = findModel(model1_expr)
+    model2 = findModel(model2_expr)
     print("hit!")
     return (model1, model2)
 
