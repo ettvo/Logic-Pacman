@@ -300,11 +300,6 @@ def pacphysicsAxioms(t: int, all_coords: List[Tuple], non_outer_wall_coords: Lis
             locations on this time step. Consider edge cases. Don't call if None.
     """
     pacphysics_sentences = []
-    # >> = -->
-    # % = <==>
-    # ~ = NOT
-    # & = AND
-    # | = OR
 
     "*** BEGIN YOUR CODE HERE ***"
     wallConditions = []
@@ -312,13 +307,11 @@ def pacphysicsAxioms(t: int, all_coords: List[Tuple], non_outer_wall_coords: Lis
         for wall in all_coords: 
             wallConditions.append(PropSymbolExpr(wall_str, wall[0], wall[1]) >> ~PropSymbolExpr(pacman_str, wall[0], wall[1], time=t))
         pacphysics_sentences.append(conjoin(wallConditions))
-        # clear
 
         positionStatements = []
         for pos in non_outer_wall_coords:
             positionStatements.append(PropSymbolExpr(pacman_str, pos[0], pos[1], time=t))
         pacphysics_sentences.append(exactlyOne(positionStatements))
-        # clear
 
         movementStatements = [PropSymbolExpr('North', time=t), \
                             PropSymbolExpr('South', time=t), \
@@ -326,26 +319,16 @@ def pacphysicsAxioms(t: int, all_coords: List[Tuple], non_outer_wall_coords: Lis
                             PropSymbolExpr('West', time=t), \
                             ] 
         pacphysics_sentences.append(exactlyOne(movementStatements))
-        # clear
 
         if (sensorModel != None):
             sensors = sensorModel(t, non_outer_wall_coords)
-            # pacphysics_sentences.append(Expr('AAAAAAAAAA'))
             pacphysics_sentences.append(sensors)
-            # pacphysics_sentences.append(Expr('AAAAAAAAAA'))
-            # print("sensor model: ", sensors)
-            # issue here, does not say BLOCKED and stuff
 
         if (successorAxioms != None and t >= 1):
             transitions = successorAxioms(t, walls_grid, non_outer_wall_coords)
-            # transitions = allLegalSuccessorAxioms(t, walls_grid, non_outer_wall_coords)
-            
-            # pacphysics_sentences.append(Expr('BBBBBBBBBB'))
             pacphysics_sentences.append(transitions)
-            # print("transitions: ", transitions)
 
     result = conjoin(pacphysics_sentences)
-    # print(result)
     return result
 
 
@@ -364,6 +347,11 @@ def checkLocationSatisfiability(x1_y1: Tuple[int, int], x0_y0: Tuple[int, int], 
         - a model where Pacman is at (x1, y1) at time t = 1
         - a model where Pacman is not at (x1, y1) at time t = 1
     """
+    # >> = -->
+    # % = <==>
+    # ~ = NOT
+    # & = AND
+    # | = OR
     walls_grid = problem.walls
     walls_list = walls_grid.asList()
     all_coords = list(itertools.product(range(problem.getWidth()+2), range(problem.getHeight()+2)))
